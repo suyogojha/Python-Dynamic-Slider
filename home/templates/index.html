@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <!-- Compiled and minified CSS -->
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+
+     <!-- Compiled and minified JavaScript -->
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+             
+    <title>Document</title>
+</head>
+<body>
+    
+    <nav>
+        <div class="nav-wrapper">
+            <a href="/" class="brand-logo p3">Django Hotels</a>
+        </div>
+    </nav>
+
+    <div style="margin-top:50px;" class="container">
+        <div class="row">
+            <div class="col m4">
+                <div class="input-field col s12">
+                    <select multiple id="emenities" onchange="getHotels()" >
+                        <option value="" disabled selected>Choose Your option</option>
+                        {% for emenitie in emenities %}
+                        <option value="{{ emenitie.id }}" >{{ emenitie.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <label>Select Emenities</label>
+                </div>
+            </div>
+            <div class="col m4">
+                <label> Hotel Price</label>
+                <p class="rage-field">
+                    <input type="range" onchange="getHotels()" id="price" min="500" max="5000" value="5000">
+                </p>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row" id="show_hotels_here"></div>
+        </div>
+
+
+
+    <script>
+        var show_hotels_here = document.getElementById("show_hotels_here")
+        $(document).ready(function() {
+            $('select').formSelect();
+        });
+
+        function getHotels(){
+            var price = document.getElementById('price')
+            var instance = M.FormSelect.getInstance(document.getElementById('emenities'))
+            var emenities = ''
+            var html = ''
+            if(instance) {
+            emenities = (instance.getSelectedValues())
+            }
+
+            fetch(`/api/hotels?emenities=${emenities}&price=${price.value}`)
+            .then(result => result.json())
+            .then(response => {
+                for(var i = 0; i<response.length; i++){
+                    html += `
+                        <div class="col s3">
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="${response[i].hotel_image}">
+                                    </div>
+                                    <span class="card-title black-text">${response[i].hotel_name}</span>
+                                </div>
+                                <div class="card-content">
+                                    Price - <span class="new badge">${(response[i].hotel_price)}</span>
+                                    <p>${(response[i].hotel_description).substring(0, 250)}</p>
+                                </div>
+                            </div>
+                    `
+                }
+                show_hotels_here.innerHTML = html
+            })
+        }
+        
+    </script>
+
+
+
+
+
+</body>
+</html>
